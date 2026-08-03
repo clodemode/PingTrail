@@ -1,0 +1,10 @@
+.DS_Store
+data/*
+!data/.gitkeep
+__pycache__/
+*.py[cod]
+*.sqlite3
+.venv/
+.env
+staticfiles/
+app/static/

@@ -1,0 +1,103 @@
+{% load trail_extras %}
+{# Inline expansion — never a modal (spec-no-modals-htmx-inline-expansion). #}
+<div class="pt-detail p-2 mt-2" role="region" aria-label="Raw RTT detail for tick {{ sample.pk }}">
+  <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+    <strong class="small">
+      <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
+      Raw RTT &mdash; tick {{ sample.pk }} &middot; {{ sample.fired_at|date:"Y-m-d H:i:s" }}
+    </strong>
+    <span class="badge text-bg-light border font-monospace-sm">{{ sample.prober|default:"unknown prober" }}</span>
+    {% if tick.void %}
+      <span class="badge pt-void-badge">VOID &mdash; every rung timed out</span>
+    {% else %}
+      <span class="badge text-bg-light border">total {{ tick.total_ms|floatformat:3 }} ms</span>
+    {% endif %}
+    {% if tick.inversions %}
+      <span class="badge border pt-inversion">{{ tick.inversions|length }} inversion{{ tick.inversions|length|pluralize }}</span>
+    {% endif %}
+    <button class="btn btn-sm btn-outline-secondary ms-auto py-0 px-2" style="font-size:.72rem"
+            hx-get="{% url 'trail:tick_collapse' slug=trail.slug pk=sample.pk %}"
+            hx-target="#panel-tick"
+            hx-swap="innerHTML"
+            aria-expanded="true">
+      <i class="fa-solid fa-xmark"></i> Close
+    </button>
+  </div>
+
+  {% if tick.void %}
+    <p class="small text-danger mb-2">
+      <i class="fa-solid fa-triangle-exclamation me-1"></i>
+      Every rung on the ladder timed out in this tick. No bar is drawn and no value is
+      interpolated across the gap &mdash; the chart shows exactly what was sampled: nothing.
+    </p>
+  {% endif %}
+
+  <div class="table-responsive">
+    <table class="table table-sm pt-table mb-0">
+      <thead>
+        <tr>
+          <th>#</th><th>rung</th><th>host(s)</th>
+          <th class="pt-num">raw RTT</th>
+          <th class="pt-num">segment &Delta;</th>
+          <th class="pt-num">loss</th>
+          <th>note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr class="{% if row.level.lost %}pt-void-row{% endif %}">
+            <td><span class="pt-ladder-depth">{{ row.level.depth }}</span></td>
+            <td class="text-nowrap">
+              <i class="fa-solid {{ row.meta.icon }} me-1" style="color:{{ row.meta.colour }}"></i>{{ row.level.label }}
+            </td>
+            <td class="font-monospace-sm">
+              {% for host, rtt, err in row.level.per_host %}
+                <div>
+                  {{ host }}
+                  {% if rtt is None %}
+                    <span class="pt-lost">timeout{% if err %} &middot; {{ err }}{% endif %}</span>
+                  {% else %}
+                    <span class="text-muted">{{ rtt|floatformat:3 }} ms</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </td>
+            <td class="pt-num">
+              {% if row.level.rtt_ms is None %}
+                <span class="pt-lost">timeout</span>
+              {% else %}
+                {{ row.level.rtt_ms|floatformat:3 }}
+              {% endif %}
+            </td>
+            <td class="pt-num {% if row.segment.inverted %}pt-inversion{% endif %}">
+              {% if row.segment %}
+                {{ row.segment.delta_ms|floatformat:3 }}
+              {% else %}
+                &mdash;
+              {% endif %}
+            </td>
+            <td class="pt-num {% if row.level.loss_pct %}pt-lost{% endif %}">{{ row.level.loss_pct|floatformat:1 }}%</td>
+            <td class="small text-muted">
+              {% if row.segment.inverted %}
+                <span class="pt-inversion">
+                  <i class="fa-solid fa-arrow-down-up-across-line me-1"></i>
+                  INVERSION &mdash; answered {{ row.segment.delta_ms|abs_ms|floatformat:3 }} ms faster than depth {{ row.segment.from_depth }}.
+                  Slow-path ICMP to a router control plane; kept negative, never clamped.
+                </span>
+              {% elif row.segment.from_depth is None and row.segment %}
+                baseline &mdash; {{ row.meta.blurb }}
+              {% elif row.level.lost %}
+                <span class="pt-lost">level lost &mdash; the segment above spans it</span>
+              {% else %}
+                {{ row.meta.blurb }}
+              {% endif %}
+              {% if row.segment.spans_lost_levels %}
+                <span class="text-danger">(spans lost depth {{ row.segment.spans_lost_levels|join:", " }})</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

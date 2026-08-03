@@ -1,0 +1,55 @@
+{% comment %}
+Inline correction of a rung. The row swaps itself for this form and back —
+an expanded region in place, never a modal (spec-no-modals-htmx-inline-expansion).
+
+Saving PINS whichever field changed, so the next discover_trail leaves it alone.
+Discovery guesses from address space; the operator knows what the box is.
+{% endcomment %}
+<tr id="rung-{{ rung.pk }}" class="table-active">
+  <td><span class="pt-ladder-depth">{{ rung.depth }}</span></td>
+  <td colspan="5">
+    <form hx-post="{% url 'trail:rung_update' slug=trail.slug pk=rung.pk %}"
+          hx-target="#rung-{{ rung.pk }}"
+          hx-swap="outerHTML"
+          role="region"
+          aria-label="Correct rung {{ rung.label }}"
+          class="d-flex flex-wrap align-items-end gap-2">
+
+      <div>
+        <label class="pt-kpi-label mb-1 d-block" for="kind-{{ rung.pk }}">kind</label>
+        <select class="form-select form-select-sm" style="width:11rem" id="kind-{{ rung.pk }}" name="kind">
+          {% for value, display in kind_choices %}
+            <option value="{{ value }}" {% if value == rung.kind %}selected{% endif %}>{{ display }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="pt-kpi-label mb-1 d-block" for="label-{{ rung.pk }}">label</label>
+        <input class="form-control form-control-sm font-monospace-sm" style="width:11rem"
+               id="label-{{ rung.pk }}" name="label" value="{{ rung.label }}" maxlength="64">
+      </div>
+
+      <div class="small text-muted font-monospace-sm pb-1">{{ rung.host }}</div>
+
+      <button class="btn btn-sm btn-primary" type="submit"><i class="fa-solid fa-check"></i> Save</button>
+
+      <button class="btn btn-sm btn-outline-secondary" type="button"
+              hx-get="{% url 'trail:rung_row' slug=trail.slug pk=rung.pk %}"
+              hx-target="#rung-{{ rung.pk }}"
+              hx-swap="outerHTML">Cancel</button>
+
+      {% if rung.pinned %}
+        <button class="btn btn-sm btn-outline-danger" type="submit" name="unpin" value="1"
+                title="hand this rung back to discover_trail">
+          <i class="fa-solid fa-thumbtack-slash"></i> Un-pin
+        </button>
+      {% endif %}
+
+      <span class="small text-muted ms-auto" style="max-width:18rem">
+        A private address can never be an ISP hop. Saving pins your choice against
+        the next <code>discover_trail</code>.
+      </span>
+    </form>
+  </td>
+</tr>

@@ -1,0 +1,44 @@
+# ping_trail — TARGET_APP passenger (PING_TRAIL: hop-ladder latency attribution)
+# Included by ABOUT/docker-compose.yml (compose root). One source of truth here.
+# Fleet boots it as about-ping-trail-1 on :8030; standalone `docker compose up`
+# from this dir uses the same container name, so never run both at once.
+#
+# NOTE: this container NEVER pings. Inside Docker the default gateway is the
+# bridge (172.x.x.1), not the house router, and on macOS the Docker "host" is a
+# Linux VM behind its own NAT — a containerized prober would measure a fiction.
+# Measurement lives in the host-side `ping_sweep` prober, which POSTs to
+# /ingest/ (spec-ping-trail-hop-ladder-latency-attribution, VANTAGE).
+services:
+  ping-trail:
+    mem_limit: 256m
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PUID: ${PUID:-1000}
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+        IMAGE_TAG: ${IMAGE_TAG:-unknown}
+    container_name: about-ping-trail-1
+    restart: unless-stopped
+    ports:
+      - "8030:8030"
+    volumes:
+      - ./app:/app
+      - ./data:/data
+    environment:
+      DJANGO_DB_PATH: /data/db.sqlite3
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
+      KEY_PREFIX: ping_trail
+      # Shared secret for POST /ingest/ — the host prober sends it as
+      # X-Ping-Trail-Token. Dev default is a fixed dev string; override in
+      # the environment for anything reachable off-box.
+      PING_TRAIL_INGEST_TOKEN: ${PING_TRAIL_INGEST_TOKEN:-dev-ingest-token}
+      # Dev default: gunicorn --reload so ./app:/app edits go live without a
+      # restart. Prod uses the image CMD — no reload.
+      PING_TRAIL_CMD: ${PING_TRAIL_CMD:-gunicorn --no-control-socket --reload --bind 0.0.0.0:8030 --workers 2 config.wsgi}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8030/healthz', timeout=5).status==200 else 1)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s

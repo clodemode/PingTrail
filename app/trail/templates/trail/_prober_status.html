@@ -1,0 +1,28 @@
+{# The status badge. Read from the heartbeat the prober wrote — never guessed. #}
+{# Polls on its own short interval so a daemon dying is visible fast.          #}
+<div id="prober-status"
+     hx-get="{% url 'trail:control_status' slug=trail.slug %}"
+     hx-trigger="every {{ status_poll }}s"
+     hx-swap="outerHTML"
+     hx-target="this"
+     class="d-flex flex-wrap align-items-center gap-2">
+  <span class="badge {{ control.status.css }}" style="font-size:.78rem">
+    <span class="pt-dot me-1" style="background:#fff;border-radius:50%"></span>{{ control.status.label }}
+  </span>
+  <span class="small">{{ control.status.meaning }}</span>
+  <span class="small text-muted font-monospace-sm">{{ control.status.detail }}</span>
+  {% if control.pid %}
+    <span class="badge text-bg-light border font-monospace-sm" title="host process id reported by the prober itself">
+      pid {{ control.pid }}{% if control.hostname %} @ {{ control.hostname }}{% endif %}
+    </span>
+  {% endif %}
+  {% if control.last_sweep_at %}
+    <span class="small text-muted">last sweep {{ control.last_sweep_at|date:"H:i:s" }}</span>
+  {% endif %}
+  {% if control.last_error %}
+    <span class="badge text-bg-danger" title="{{ control.last_error }}">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      {{ control.consecutive_failures }} consecutive failure{{ control.consecutive_failures|pluralize }}
+    </span>
+  {% endif %}
+</div>

@@ -1,0 +1,47 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}PING_TRAIL{% endblock %}</title>
+  <link rel="icon" href="{% static 'images/ping-trail.svg' %}?v={{ bootstamp }}" type="image/svg+xml">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/ping_trail.css' %}?v={{ bootstamp }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+  <nav class="navbar navbar-expand-lg navbar-dark pt-navbar sticky-top">
+    <div class="container-fluid px-3">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'trail:home' %}">
+        <img src="{% static 'images/ping-trail.svg' %}?v={{ bootstamp }}" alt="" width="22" height="22">
+        <span class="fw-semibold">PING_TRAIL</span>
+        <span class="badge text-bg-dark fw-normal d-none d-md-inline">which segment is slow?</span>
+      </a>
+      {% block navbar_extra %}{% endblock %}
+      <span class="ms-auto small text-white-50 font-monospace">v{{ ping_trail_version }}</span>
+    </div>
+  </nav>
+
+  <main class="container-fluid px-3 py-3">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="container-fluid px-3 py-3 border-top text-muted small d-flex justify-content-between flex-wrap gap-2">
+    <span>
+      <i class="fa-solid fa-magnifying-glass-chart me-1"></i>
+      CLOGGER &middot; Watching the Pipes
+    </span>
+    <span class="font-monospace">
+      the app never pings &mdash; measurement lives in the host-side prober
+    </span>
+  </footer>
+
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="{% static 'js/echarts.min.js' %}?v={{ bootstamp }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

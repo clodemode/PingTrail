@@ -1,0 +1,98 @@
+{# LIVE REGION — polls itself (outerHTML) so ticks land without a page reload. #}
+<div id="live-stats"
+     hx-get="{% url 'trail:live_stats' slug=trail.slug %}?ticks={{ limit }}"
+     hx-trigger="every {{ live_poll }}s"
+     hx-swap="outerHTML"
+     hx-target="this">
+
+  {# ---- KPI strip ------------------------------------------------------- #}
+  <div class="pt-kpi mb-3">
+    <div>
+      <div class="pt-kpi-value">{{ tick_count }}</div>
+      <div class="pt-kpi-label">ticks shown</div>
+    </div>
+    <div>
+      <div class="pt-kpi-value">{{ trail.sample_count }}</div>
+      <div class="pt-kpi-label">ticks total</div>
+    </div>
+    <div>
+      <div class="pt-kpi-value {% if void_count %}text-danger{% endif %}">{{ void_count }}</div>
+      <div class="pt-kpi-label">void ticks</div>
+    </div>
+    <div>
+      <div class="pt-kpi-value {% if inversion_count %}pt-inversion{% endif %}">{{ inversion_count }}</div>
+      <div class="pt-kpi-label">inversions</div>
+    </div>
+    <div>
+      <div class="pt-kpi-value {% if loss_tick_count %}text-warning-emphasis{% endif %}">{{ loss_tick_count }}</div>
+      <div class="pt-kpi-label">ticks w/ loss</div>
+    </div>
+    {% if rollup.grand_ms %}
+    <div>
+      <div class="pt-kpi-value">{{ rollup.grand_ms|floatformat:1 }}<span class="fs-6 text-muted">ms</span></div>
+      <div class="pt-kpi-label">mean depth RTT</div>
+    </div>
+    <div>
+      <div class="pt-kpi-value" style="color:#0dcaf0">{{ rollup.in_house_ms|floatformat:1 }}<span class="fs-6 text-muted">ms</span></div>
+      <div class="pt-kpi-label">in-house ({{ rollup.in_house_share|floatformat:0 }}%)</div>
+    </div>
+    <div>
+      <div class="pt-kpi-value" style="color:#fd7e14">{{ rollup.isp_ms|floatformat:1 }}<span class="fs-6 text-muted">ms</span></div>
+      <div class="pt-kpi-label">ISP ({{ rollup.isp_share|floatformat:0 }}%)</div>
+    </div>
+    {% endif %}
+    {% if latest %}
+    <div>
+      <div class="pt-kpi-value font-monospace" style="font-size:1.1rem">{{ latest.fired_at|date:"H:i:s" }}</div>
+      <div class="pt-kpi-label">last tick</div>
+    </div>
+    {% endif %}
+  </div>
+
+  {# ---- THE ANSWER ------------------------------------------------------ #}
+  {# The v1 defect was a bad NOUN, not a bad number: the headline said "ISP"   #}
+  {# about a box in the house. The verdict is computed from the rung kind, so #}
+  {# it cannot disagree with the classification.                              #}
+  {% if rollup.dominant %}
+  <div class="pt-answer p-3 mb-3">
+    <div class="d-flex flex-wrap align-items-center gap-3">
+      <div>
+        <div class="text-uppercase small text-muted" style="letter-spacing:.05em">Latency is being injected by</div>
+        <div class="pt-answer-seg">
+          <i class="fa-solid {{ rollup.dominant.meta.icon }} me-1" style="color:{{ rollup.dominant.meta.colour }}"></i>
+          {{ rollup.dominant.label }}
+          {% if rollup.dominant.in_house %}
+            <span class="badge text-bg-info align-middle ms-1" style="font-size:.6rem">IN YOUR HOUSE</span>
+          {% else %}
+            <span class="badge text-bg-warning align-middle ms-1" style="font-size:.6rem">OUTSIDE — ISP SIDE</span>
+          {% endif %}
+        </div>
+        <div class="small text-muted">{{ rollup.dominant.meta.blurb }}</div>
+      </div>
+      <div class="ms-auto text-end">
+        <div class="fs-3 fw-bold">{{ rollup.dominant.mean_ms|floatformat:2 }}<span class="fs-6 text-muted">ms</span></div>
+        <div class="small text-muted">{{ rollup.dominant.share|floatformat:1 }}% of the path, mean of {{ rollup.dominant.samples }} ticks</div>
+      </div>
+    </div>
+
+    {# Both sides get named. A dominant ISP hop does not excuse a sick LAN. #}
+    {% if rollup.worst_in_house and rollup.worst_isp %}
+      <div class="d-flex flex-wrap gap-3 small mt-2 pt-2 border-top">
+        <span>
+          <i class="fa-solid fa-house me-1" style="color:#0dcaf0"></i>
+          worst in-house segment:
+          <strong>{{ rollup.worst_in_house.label }}</strong>
+          {{ rollup.worst_in_house.mean_ms|floatformat:2 }}ms
+        </span>
+        <span>
+          <i class="fa-solid fa-tower-broadcast me-1" style="color:#fd7e14"></i>
+          worst ISP segment:
+          <strong>{{ rollup.worst_isp.label }}</strong>
+          {{ rollup.worst_isp.mean_ms|floatformat:2 }}ms
+        </span>
+        <span class="text-muted">these are separate problems &mdash; fixing one does not fix the other</span>
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

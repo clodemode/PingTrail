@@ -1,0 +1,12 @@
+# Dev + host-prober requirements.
+#
+# The host-side prober (`ping_sweep`, `discover_trail`) runs OUTSIDE Docker —
+# it needs the real default gateway and a real traceroute, which the container
+# cannot see. Install into a host venv:
+#
+#   /opt/homebrew/bin/python3.14 -m venv .venv
+#   .venv/bin/pip install -r requirements.txt
+#
+# ICMP needs no extra package: unprivileged datagram sockets
+# (socket.SOCK_DGRAM / IPPROTO_ICMP) are stdlib and need no root on macOS.
+-r requirements-prod.txt

@@ -1,0 +1,43 @@
+{# LIVE REGION — polls itself. The inline detail panel (#panel-tick) lives      #}
+{# OUTSIDE this element on purpose: an operator reading a tick's raw RTTs keeps #}
+{# reading them while new ticks land around them.                              #}
+<div id="live-chart"
+     hx-get="{% url 'trail:live_chart' slug=trail.slug %}?ticks={{ limit }}"
+     hx-trigger="every {{ live_poll }}s"
+     hx-swap="outerHTML"
+     hx-target="this">
+  <div class="pt-card">
+    <div class="pt-card-head">
+      <i class="fa-solid fa-chart-simple"></i>
+      Segment attribution &mdash; one bar per sample tick
+      <span class="ms-auto text-muted text-lowercase fw-normal" style="letter-spacing:0">
+        stacked bar on a category axis &middot; never interpolated between ticks
+      </span>
+    </div>
+    <div class="p-2">
+      {% if tick_count %}
+        {{ chart|json_script:"chart-data" }}
+        <div id="attribution-chart"
+             data-detail-base="{% url 'trail:dashboard' slug=trail.slug %}tick/"></div>
+        <div class="d-flex flex-wrap gap-3 small text-muted px-2 pb-1">
+          <span><span class="pt-dot" style="background:#d6336c;transform:rotate(45deg)"></span> inversion &mdash; deeper rung answered faster (never clamped to 0)</span>
+          <span><span class="pt-dot" style="background:#fff;border:2px solid #dc3545;border-radius:50%"></span> void tick &mdash; every rung timed out, no bar drawn, no bridge</span>
+          <span><i class="fa-solid fa-hand-pointer"></i> click a bar for raw RTT detail</span>
+        </div>
+        {# Re-init after an HTMX swap. Guarded: on first page load this runs   #}
+        {# BEFORE trail-chart.js is parsed, and that file inits itself on      #}
+        {# DOMContentLoaded instead.                                           #}
+        <script>window.PingTrail && window.PingTrail.initChart();</script>
+      {% else %}
+        <div class="text-center text-muted py-5">
+          <div class="mb-2"><i class="fa-solid fa-wave-square fa-2x opacity-50"></i></div>
+          <p class="mb-1">No ticks recorded yet.</p>
+          <p class="small mb-0 font-monospace-sm">
+            start sweeping from the prober card, or run one shot by hand:<br>
+            .venv/bin/python app/manage.py ping_sweep --trail {{ trail.slug }} --once --force
+          </p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+fly.toml
+.git/
+.venv/
+*.sqlite3
+*.md
+.env*
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.eggs/
+data/
+LORE/

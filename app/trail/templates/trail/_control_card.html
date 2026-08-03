@@ -1,0 +1,92 @@
+{% comment %}
+The prober control card.
+
+PULL ONLY. Nothing here reaches out and touches a host process — the container
+cannot, and pretending otherwise would break the host/container split that makes
+the measurement honest. This card publishes INTENT; the daemon picks it up on
+its next poll, within one interval.
+
+Hence the deliberate wording throughout: this page starts and stops SWEEPING.
+Starting and stopping the DAEMON is a host-side act.
+{% endcomment %}
+<div id="control-card" class="pt-card mb-3">
+  <div class="pt-card-head">
+    <i class="fa-solid fa-satellite-dish"></i> Prober &mdash; {{ control.vantage.name }}
+    <span class="ms-auto text-muted text-lowercase fw-normal" style="letter-spacing:0">
+      pull control plane &middot; orders collected each cycle
+    </span>
+  </div>
+  <div class="p-2">
+
+    {% include "trail/_prober_status.html" %}
+
+    <div class="d-flex flex-wrap align-items-end gap-3 mt-2 pt-2 border-top">
+
+      {# ---- start / stop SWEEPING ---------------------------------------- #}
+      <div>
+        <div class="pt-kpi-label mb-1">sweeping</div>
+        <button class="btn btn-sm {% if control.enabled %}btn-danger{% else %}btn-success{% endif %}"
+                hx-post="{% url 'trail:control_update' slug=trail.slug %}"
+                hx-vals='{"action": "toggle"}'
+                hx-target="#control-card"
+                hx-swap="outerHTML">
+          {% if control.enabled %}
+            <i class="fa-solid fa-stop"></i> Stop sweeping
+          {% else %}
+            <i class="fa-solid fa-play"></i> Start sweeping
+          {% endif %}
+        </button>
+      </div>
+
+      {# ---- interval + timeout ------------------------------------------- #}
+      <form hx-post="{% url 'trail:control_update' slug=trail.slug %}"
+            hx-target="#control-card"
+            hx-swap="outerHTML"
+            class="d-flex flex-wrap align-items-end gap-2">
+        <input type="hidden" name="action" value="settings">
+        <div>
+          <label class="pt-kpi-label mb-1 d-block" for="interval_seconds">interval (s)</label>
+          <input class="form-control form-control-sm font-monospace-sm" style="width:6rem"
+                 type="number" min="5" max="3600" step="1"
+                 id="interval_seconds" name="interval_seconds" value="{{ control.interval_seconds }}">
+        </div>
+        <div>
+          <label class="pt-kpi-label mb-1 d-block" for="timeout_seconds">ICMP timeout (s)</label>
+          <input class="form-control form-control-sm font-monospace-sm" style="width:6rem"
+                 type="number" min="0.5" max="30" step="0.5"
+                 id="timeout_seconds" name="timeout_seconds" value="{{ control.timeout_seconds|floatformat:1 }}">
+        </div>
+        <button class="btn btn-sm btn-outline-primary" type="submit">
+          <i class="fa-solid fa-check"></i> Apply
+        </button>
+      </form>
+
+      <div class="ms-auto small text-muted" style="max-width:24rem">
+        <i class="fa-solid fa-circle-info me-1"></i>
+        This page controls <strong>sweeping</strong>, not the daemon. The prober keeps
+        polling while sweeping is off, so the toggle takes effect within one interval
+        without touching a terminal &mdash; and a
+        <span class="badge text-bg-danger" style="font-size:.6rem">STALE</span>
+        badge means the daemon itself is gone, which only a shell can fix.
+      </div>
+    </div>
+
+    {% if not control.trail %}
+      <p class="small text-danger mb-0 mt-2">
+        <i class="fa-solid fa-triangle-exclamation me-1"></i>
+        No trail assigned to this vantage &mdash; the prober will fetch an empty ladder.
+      </p>
+    {% elif control.trail.slug != trail.slug %}
+      <p class="small text-warning-emphasis mb-0 mt-2">
+        <i class="fa-solid fa-triangle-exclamation me-1"></i>
+        This vantage is sweeping <strong>{{ control.trail.name }}</strong>, not the trail on screen.
+        <button class="btn btn-sm btn-outline-secondary py-0 px-2 ms-1" style="font-size:.72rem"
+                hx-post="{% url 'trail:control_update' slug=trail.slug %}"
+                hx-vals='{"trail_slug": "{{ trail.slug }}"}'
+                hx-target="#control-card" hx-swap="outerHTML">
+          sweep {{ trail.name }} instead
+        </button>
+      </p>
+    {% endif %}
+  </div>
+</div>

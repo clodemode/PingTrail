@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static trail_extras %}
+
+{% block title %}{{ trail.name }} — PING_TRAIL{% endblock %}
+
+{% block navbar_extra %}
+  <div class="d-flex align-items-center gap-1 flex-wrap ms-lg-3">
+    {% for t in trails %}
+      <a href="{% url 'trail:dashboard' slug=t.slug %}"
+         class="btn btn-sm {% if t.slug == trail.slug %}btn-light{% else %}btn-outline-light{% endif %} d-flex align-items-center gap-1">
+        <i class="fa-solid fa-diagram-project"></i>
+        {{ t.name }}
+        <span class="badge {% if t.slug == trail.slug %}text-bg-secondary{% else %}text-bg-dark{% endif %} fw-normal">{{ t.n_rungs }}r</span>
+        <span class="badge {% if t.slug == trail.slug %}text-bg-secondary{% else %}text-bg-dark{% endif %} fw-normal">{{ t.n_samples }}t</span>
+      </a>
+    {% endfor %}
+  </div>
+{% endblock %}
+
+{% block content %}
+
+{# ---- breadcrumb + context ---------------------------------------------- #}
+<nav aria-label="breadcrumb" class="mb-2">
+  <ol class="breadcrumb small mb-1">
+    <li class="breadcrumb-item"><a href="{% url 'trail:home' %}">Trails</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ trail.name }}</li>
+  </ol>
+  <div class="d-flex flex-wrap align-items-center gap-3 small text-muted">
+    <span><i class="fa-solid fa-location-crosshairs me-1"></i>vantage <strong class="text-body">{{ trail.vantage.name }}</strong></span>
+    <span><i class="fa-solid fa-layer-group me-1"></i><strong class="text-body">{{ rungs|length }}</strong> active rungs</span>
+    {% if inactive_rungs %}<span class="text-warning-emphasis"><i class="fa-solid fa-eye-slash me-1"></i>{{ inactive_rungs|length }} retired (history kept)</span>{% endif %}
+    <span><i class="fa-solid fa-clock-rotate-left me-1"></i>ladder discovered {{ trail.discovered_at|default:"—" }}</span>
+  </div>
+</nav>
+
+{# ---- prober control plane (pull only) ---------------------------------- #}
+{% include "trail/_control_card.html" %}
+
+{# ---- live stat band + the answer --------------------------------------- #}
+{% include "trail/_stat_band.html" %}
+
+<div class="row g-3">
+
+  {# ---- chart (live region) --------------------------------------------- #}
+  <div class="col-12 col-xl-8">
+    {% include "trail/_chart_region.html" %}
+
+    {# ---- inline expansion target ------------------------------------- #}
+    {# Deliberately OUTSIDE every polled region: an open raw-detail panel  #}
+    {# must survive a refresh cycle (no modals, no blown-away reading).    #}
+    <div id="panel-tick"></div>
+  </div>
+
+  {# ---- rollup (live region) + ladder (operator-editable) --------------- #}
+  <div class="col-12 col-xl-4">
+
+    {% include "trail/_rollup_region.html" %}
+
+    <div class="pt-card">
+      <div class="pt-card-head">
+        <i class="fa-solid fa-list-ol"></i> The ladder
+        <span class="ms-auto text-muted text-lowercase fw-normal" style="letter-spacing:0">
+          discovery guesses &middot; you correct
+        </span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm pt-table">
+          <thead>
+            <tr><th>#</th><th>rung</th><th>host</th><th>side</th><th>reaches</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for rung in rungs %}
+              {% include "trail/_rung_row.html" %}
+            {% empty %}
+              <tr><td colspan="6" class="text-muted text-center py-3">
+                no rungs &mdash; run <code>discover_trail</code>
+              </td></tr>
+            {% endfor %}
+            {% for rung in inactive_rungs %}
+              <tr class="opacity-50">
+                <td><span class="pt-ladder-depth">{{ rung.depth }}</span></td>
+                <td class="text-nowrap"><i class="fa-solid fa-eye-slash me-1"></i>{{ rung.label }}</td>
+                <td class="font-monospace-sm">{{ rung.host }}</td>
+                <td></td>
+                <td class="small text-muted" colspan="2">retired &mdash; history kept</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="small text-muted px-2 pb-2 mb-0">
+        <i class="fa-solid fa-shield-halved me-1"></i>
+        A private address (10/8, 172.16/12, 192.168/16, 100.64/10) is
+        <strong>never</strong> classified as an ISP hop &mdash; address space decides, not
+        traceroute position.
+      </p>
+    </div>
+  </div>
+</div>
+
+{# ---- per-tick table (live region) -------------------------------------- #}
+{% include "trail/_ticks_region.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/trail-chart.js' %}?v={{ bootstamp }}"></script>
+{% endblock %}

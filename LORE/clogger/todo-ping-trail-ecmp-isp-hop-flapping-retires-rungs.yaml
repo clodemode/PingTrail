@@ -1,0 +1,37 @@
+entries:
+- slug: todo-ping-trail-ecmp-isp-hop-flapping-retires-rungs
+  title: 'PING_TRAIL: an ECMP ISP path alternates between two first-hops, so each discover_trail retires
+    the other'
+  domain: lore
+  lore_type: todo
+  app_scope: ping_trail
+  lair: logic
+  character_slug: clogger
+  tags:
+  - ping-trail
+  - discovery
+  - ecmp
+  - ladder
+  - clogger
+  unlock: true
+  description: |-
+    Found during PING_TRAIL v2 verification, 2026-08-01. Traceroute to 1.1.1.1 returns one first-hop ISP device on some passes and a different one on others (call them 192.88.99.1 and 192.88.99.2 — stand-in addresses; the real pair is an operator's own circuit) — ECMP / per-flow load balancing at the ISP edge, not a topology change. Because apply_ladder deactivates any rung the current pass did not see, each discover_trail run retires whichever ISP hop it did not happen to observe, and the ladder ping-pongs between them.
+
+    v2 already fixed the WORSE half of this: a DEGRADED pass (traceroute failed, or saw no public hop at all) no longer retires anything, because a pass that cannot see the path is not evidence that a rung is gone. But a CLEAN pass that simply took the other ECMP branch still retires the sibling, and that is the case left open.
+
+    Current workaround in the field: both alternating hops are left active at depth 3, both labelled isp_hop, so attribution aggregates them as one tier (the same way public_dns already carries 1.1.1.1 + 8.8.8.8, with the level RTT taken as the MIN across answering probes). That is coherent, but it was set by hand — the next discover_trail will retire one of them again.
+
+    Scope note: left as a todo rather than fixed inline because it is not in spec-ping-trail-control-plane-and-rfc1918-classification, and the right fix needs a judgement call about how many passes of absence should count as evidence.
+  dont: 'DON''T fix this by disabling deactivate_missing wholesale — a rung that genuinely leaves the
+    path must still be retirable, and the v2 test test_a_clean_pass_still_retires_a_rung_that_genuinely_left_the_path
+    pins that. DON''T merge the two hops into one rung: they are distinct devices and their individual
+    RTTs are real data. DON''T assume traceroute took the same branch the ICMP sweep will — the sweep
+    addresses the hop directly, the traceroute walked a flow.'
+  do_this: 'Consider requiring N consecutive clean passes of absence before retiring a rung (an absent_since
+    / missed_passes counter on Rung), so an ECMP branch that reappears on the next run is never retired.
+    Alternative: treat sibling rungs at the same depth with the same kind as one tier and retire only
+    when EVERY member of the tier goes missing. Either way, add a discover_trail note naming the alternation
+    explicitly so the operator sees ECMP rather than a mystery.'
+  do_also: 'Reference implementation to read first: ping_trail/app/trail/services.py apply_ladder (the
+    deactivate_missing branch), ping_trail/app/trail/discovery.py is_degraded, and ping_trail/app/trail/management/commands/discover_trail.py
+    (the DEGRADED PASS guard added in v2). Tests live in app/trail/tests/test_classification.py::DegradedDiscoveryNeverRetiresARungTest.'

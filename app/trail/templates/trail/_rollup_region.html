@@ -1,0 +1,50 @@
+{# LIVE REGION — mean contribution per segment, split in-house vs ISP. #}
+<div id="live-rollup"
+     hx-get="{% url 'trail:live_rollup' slug=trail.slug %}?ticks={{ limit }}"
+     hx-trigger="every {{ live_poll }}s"
+     hx-swap="outerHTML"
+     hx-target="this"
+     class="pt-card mb-3">
+  <div class="pt-card-head">
+    <i class="fa-solid fa-ranking-star"></i> Mean contribution per segment
+    {% if rollup.grand_ms %}
+      <span class="ms-auto text-lowercase fw-normal" style="letter-spacing:0">
+        <span class="badge" style="background:#0dcaf0">in-house {{ rollup.in_house_share|floatformat:0 }}%</span>
+        <span class="badge" style="background:#fd7e14">ISP {{ rollup.isp_share|floatformat:0 }}%</span>
+      </span>
+    {% endif %}
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm pt-table">
+      <thead>
+        <tr><th>segment</th><th>side</th><th class="pt-num">mean</th><th style="width:28%">share</th></tr>
+      </thead>
+      <tbody>
+        {% for row in rollup.rows %}
+          <tr>
+            <td class="text-nowrap">
+              <i class="fa-solid {{ row.meta.icon }} me-1" style="color:{{ row.meta.colour }}"></i>
+              {{ row.label }}
+              {% if row.inverted %}<span class="badge pt-inversion border ms-1" style="font-size:.6rem">inverted</span>{% endif %}
+            </td>
+            <td>
+              {% if row.in_house %}
+                <span class="badge text-bg-info" style="font-size:.6rem" title="equipment inside the house">house</span>
+              {% else %}
+                <span class="badge text-bg-warning" style="font-size:.6rem" title="beyond the demarcation point">ISP</span>
+              {% endif %}
+            </td>
+            <td class="pt-num {% if row.inverted %}pt-inversion{% endif %}">{{ row.mean_ms|floatformat:3 }}</td>
+            <td>
+              <div class="pt-share" title="{{ row.share|floatformat:1 }}%">
+                <span style="width:{{ row.bar_width|floatformat:1 }}%;background:{{ row.meta.colour }}"></span>
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="text-muted text-center py-3">no live ticks in range</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

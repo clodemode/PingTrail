@@ -1,0 +1,48 @@
+entries:
+- slug: spec-ping-trail-control-plane-and-rfc1918-classification
+  title: 'SPEC: PING_TRAIL v2 — pull-based prober control plane + RFC1918 rung classification'
+  domain: lore
+  lore_type: spec
+  app_scope: ping_trail
+  lair: logic
+  character_slug: clogger
+  tags:
+  - ping-trail
+  - control-plane
+  - rfc1918
+  - classification
+  - htmx
+  - spec
+  unlock: true
+  description: |-
+    Extends spec-ping-trail-hop-ladder-latency-attribution. Three defects/gaps found operating v1 on 2026-08-01.
+
+    1. RFC1918 MISCLASSIFICATION (defect, operator-reported). Discovery labelled 192.168.1.1 as `isp_hop1` / "last mile / ISP backhaul". It is a HOME DSL ROUTER — still inside the house. A private address (10/8, 172.16/12, 192.168/16, 100.64/10 CGNAT) can NEVER be an ISP hop, and discovery must refuse that classification on address space alone rather than on traceroute position. The topology that exposed it is a common one: TWO home routers in series, 192.168.11.1 (inner LAN router) then 192.168.1.1 (DSL router), with only the first PUBLIC address beyond them a true ISP device. The measurements were correct; only the labels lied — which is worse, because the headline attribution reads "ISP" when the segment is in the house.
+
+    2. NO CONTROL PLANE (gap). The prober is a host-side CLI loop. The operator wants start/stop/interval control and live results from the Django site. The container cannot spawn a host process — that is the whole point of the host/container split — so control must be PULL: the prober polls the site each cycle for its marching orders and obeys them, and heartbeats back so the UI can show whether it is alive.
+
+    3. PROBER NEEDS DB ACCESS (architectural leak, found on first daemon start). ping_sweep reads the ladder straight from the DB, so starting it on the host required DJANGO_DB_PATH pointed at the container's sqlite file. That only works because host and container happen to share one file on this machine, and it silently breaks the decoupling the v1 spec asserts. The prober must obtain the ladder over HTTP from the control endpoint and hold NO database configuration at all.
+  dont: |-
+    DONT classify any RFC1918 / CGNAT address as an ISP rung, regardless of where traceroute found it. Address space decides, not hop position.
+
+    DONT let the Django app start, stop, or signal the host prober directly — it cannot, and faking it (shelling out, docker exec, ssh) breaks the host/container split that makes the measurement honest. Control is PULL ONLY: the prober asks, the site answers.
+
+    DONT let the prober keep any DB configuration or import models for ladder lookup — it fetches the ladder over HTTP. If ping_sweep still needs DJANGO_DB_PATH to start, this spec is not done.
+
+    DONT reclassify or renumber existing Rung rows in a way that orphans historical Probes — depth and identity must stay stable so 30+ ticks of collected history remain readable.
+
+    DONT auto-refresh the dashboard by reloading the whole page — HTMX-swap the live regions only, so an operator's open inline detail panel is not blown away every few seconds.
+  do_this: |-
+    CLASSIFICATION: add rung kinds `home_router` (private address beyond the default gateway — the DSL/cable box) and keep `isp_hop` for the first PUBLIC address in the traceroute. Discovery classifies purely by address space via `ipaddress.ip_address(...).is_private`. Re-label the affected ladder: depth 1 gateway (inner LAN router), depth 2 home_router 192.168.1.1 (DSL), depth 3 isp_hop (the first true ISP device — the first PUBLIC address). Make rung `kind` and `label` operator-editable INLINE from the ladder table (HTMX, no modal) — discovery guesses, the operator corrects, and the correction survives re-discovery.
+
+    CONTROL PLANE: model `ProberControl` (per Vantage: enabled, interval_seconds, timeout_seconds, trail, updated_at) plus heartbeat fields the prober writes (last_seen_at, pid, hostname, last_error, consecutive_failures). Endpoint `GET /control/<vantage>/` (token-auth) returns marching orders AND the full ladder; the prober polls it every cycle, obeys enabled/interval/timeout, and POSTs its heartbeat with each ingest. UI: start/stop toggle, interval + timeout controls, and a live prober-status badge — ALIVE (last seen < 2 intervals), STALE, or STOPPED — that reads the heartbeat, never a guess.
+
+    LIVE RESULTS: HTMX-poll the stat band, chart, rollup and tick table on a short interval so ticks land without a manual reload. Poll the regions, not the page.
+  do_also: |-
+    The prober daemon stays running when `enabled=false` — it idles and keeps polling, so the UI toggle takes effect within one interval without anyone touching a terminal. Stopping the DAEMON remains a host-side act; the UI controls SWEEPING, and the badge must make that distinction legible rather than implying the site can kill the process.
+
+    Interval changes take effect on the next cycle, not after a restart.
+
+    Already-collected history (trail 1 `home`, 30+ ticks as of 2026-08-01) must remain queryable and correctly rendered after the reclassification — verify by running trail_report over the oldest ticks after migrating.
+
+    Note for interpretation once relabelled: on the v1 sample window the in-house segments were clean (home_router +3.9ms mean) while the first ISP hop carried +711ms — but `gateway` showed +93.6ms mean, which is the Mac-to-inner-router link and is a SEPARATE in-house problem (likely WiFi contention) worth surfacing distinctly from the ISP finding.

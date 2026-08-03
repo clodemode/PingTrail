@@ -1,0 +1,85 @@
+{% load trail_extras %}
+{# LIVE REGION — the tick table. Polls itself; the raw-detail panel it opens   #}
+{# sits outside this element, so a refresh cycle cannot close it.              #}
+<div id="live-ticks"
+     hx-get="{% url 'trail:live_ticks' slug=trail.slug %}?ticks={{ limit }}"
+     hx-trigger="every {{ live_poll }}s"
+     hx-swap="outerHTML"
+     hx-target="this"
+     class="pt-card mt-3">
+  <div class="pt-card-head">
+    <i class="fa-solid fa-table-list"></i> Ticks (newest first)
+    <span class="ms-auto text-muted text-lowercase fw-normal" style="letter-spacing:0">
+      showing {{ tick_count }} of {{ trail.sample_count }} &middot; live
+    </span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover pt-table">
+      <thead>
+        <tr>
+          <th>fired at</th>
+          <th class="pt-num">total</th>
+          <th>dominant segment</th>
+          {# delta, not a share — an inversion elsewhere lets one segment exceed the total #}
+          <th class="pt-num">its &Delta; ms</th>
+          <th>flags</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tick in ticks %}
+          <tr class="{% if tick.void %}pt-void-row{% endif %}">
+            <td class="font-monospace-sm">{{ tick.fired_at|date:"Y-m-d H:i:s" }}</td>
+            <td class="pt-num">
+              {% if tick.void %}<span class="text-danger">&mdash;</span>
+              {% else %}{{ tick.total_ms|floatformat:3 }}{% endif %}
+            </td>
+            <td>
+              {% if tick.void %}
+                <span class="badge pt-void-badge">VOID &mdash; all rungs timed out</span>
+              {% elif tick.dominant_segment %}
+                <span class="pt-dot me-1" style="background:{{ tick.dominant_segment.kind|kind_colour }}"></span>
+                {{ tick.dominant_segment.label }}
+                {% if tick.dominant_segment.kind|kind_in_house %}
+                  <span class="badge text-bg-info ms-1" style="font-size:.55rem">house</span>
+                {% else %}
+                  <span class="badge text-bg-warning ms-1" style="font-size:.55rem">ISP</span>
+                {% endif %}
+              {% else %}
+                <span class="text-muted">no positive segment</span>
+              {% endif %}
+            </td>
+            <td class="pt-num">
+              {% if tick.dominant_segment and tick.total_ms %}{{ tick.dominant_segment.delta_ms|floatformat:3 }}{% else %}&mdash;{% endif %}
+            </td>
+            <td>
+              {% for inv in tick.inversions %}
+                <span class="badge border pt-inversion" style="font-size:.62rem" title="depth {{ inv.to_depth }} answered faster than depth {{ inv.from_depth }}">
+                  <i class="fa-solid fa-arrow-down-up-across-line"></i> {{ inv.label }} {{ inv.delta_ms|floatformat:2 }}
+                </span>
+              {% endfor %}
+              {% for lost in tick.lost_levels %}
+                <span class="badge text-bg-danger" style="font-size:.62rem">
+                  <i class="fa-solid fa-plug-circle-xmark"></i> {{ lost.label }} lost
+                </span>
+              {% endfor %}
+            </td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-secondary py-0 px-2"
+                      style="font-size:.72rem"
+                      hx-get="{% url 'trail:tick_detail' slug=trail.slug pk=tick.sample_id %}"
+                      hx-target="#panel-tick"
+                      hx-swap="innerHTML"
+                      aria-controls="panel-tick"
+                      aria-expanded="false">
+                <i class="fa-solid fa-magnifying-glass-plus"></i> raw
+              </button>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="text-muted text-center py-4">No ticks yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

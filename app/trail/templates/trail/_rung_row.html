@@ -1,0 +1,29 @@
+{# Read-only ladder row. Swapped in place by the inline edit form — no modal. #}
+<tr id="rung-{{ rung.pk }}">
+  <td><span class="pt-ladder-depth">{{ rung.depth }}</span></td>
+  <td class="text-nowrap">
+    <i class="fa-solid {{ rung.meta.icon }} me-1" style="color:{{ rung.meta.colour }}"></i>{{ rung.label }}
+    {% if rung.pinned %}
+      <i class="fa-solid fa-thumbtack ms-1 text-primary" style="font-size:.65rem"
+         title="operator-corrected — discover_trail will not overwrite this"></i>
+    {% endif %}
+  </td>
+  <td class="font-monospace-sm">{{ rung.host }}</td>
+  <td>
+    {% if rung.in_house %}
+      <span class="badge text-bg-info" style="font-size:.6rem" title="private address — inside the house">house</span>
+    {% else %}
+      <span class="badge text-bg-warning" style="font-size:.6rem" title="public address — beyond the demarcation point">ISP</span>
+    {% endif %}
+  </td>
+  <td class="small text-muted">{{ rung.meta.blurb }}</td>
+  <td class="text-end">
+    <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:.7rem"
+            hx-get="{% url 'trail:rung_edit' slug=trail.slug pk=rung.pk %}"
+            hx-target="#rung-{{ rung.pk }}"
+            hx-swap="outerHTML"
+            aria-label="Correct rung {{ rung.label }}">
+      <i class="fa-solid fa-pen"></i>
+    </button>
+  </td>
+</tr>
