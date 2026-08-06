@@ -19,7 +19,9 @@ RUN pip install --upgrade pip && \
     rm -rf /root/.cache/
 
 COPY app/ /app/
-RUN python manage.py collectstatic --noinput
+# --skip-checks: Django 6.1's `check` supplies ALL databases when unspecified,
+# so build-stage system checks reach for a DB this image does not have.
+RUN python manage.py collectstatic --noinput --skip-checks
 
 # -----------------------------------------------------------------------------
 # Stage 2: final – minimal runtime
