@@ -13,7 +13,7 @@ entries:
   - classification
   - htmx
   - spec
-  unlock: true
+  status: canonical
   description: |-
     Extends spec-ping-trail-hop-ladder-latency-attribution. Three defects/gaps found operating v1 on 2026-08-01.
 

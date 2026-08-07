@@ -14,7 +14,7 @@ entries:
       - echarts
       - diagnostics
       - spec
-    unlock: true
+    status: canonical
     description: |-
       PING_TRAIL answers one question: "our internet feels slow — WHICH SEGMENT is injecting the latency?"
 
