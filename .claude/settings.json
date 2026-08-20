@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "../ABOUT/CLODE/scripts/session-start-orient.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
