@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "../ABOUT/CLODE/scripts/session-start-orient.sh"
+            "command": "[ -x ../ABOUT/CLODE/scripts/session-start-orient.sh ] && ../ABOUT/CLODE/scripts/session-start-orient.sh || true"
           }
         ]
       }
