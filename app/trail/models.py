@@ -26,7 +26,8 @@ class RungKind(models.TextChoices):
     LOOPBACK = "loopback", "Loopback"
     GATEWAY = "gateway", "Gateway"
     # A private address beyond the default gateway — a second router still
-    # inside the house (Kris: 192.168.11.1 inner -> 192.168.1.1 DSL box).
+    # inside the house (a common shape: an inner LAN router in front of the
+    # ISP's DSL/cable box, both on private addresses).
     # NEVER an ISP rung, no matter where traceroute found it.
     HOME_ROUTER = "home_router", "Home router"
     ISP_HOP = "isp_hop", "ISP hop"
@@ -42,7 +43,7 @@ IN_HOUSE_KINDS = frozenset({RungKind.LOOPBACK, RungKind.GATEWAY, RungKind.HOME_R
 
 
 def is_in_house(kind):
-    """True when this rung is equipment Kris owns, on Kris's side of the demarc."""
+    """True when this rung is the operator's own equipment, their side of the demarc."""
     return kind in IN_HOUSE_KINDS
 
 

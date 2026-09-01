@@ -9,9 +9,10 @@ a half-discovered trail is useful; a crashed command is not.
 
 CLASSIFICATION IS BY ADDRESS SPACE, NOT BY POSITION
 ---------------------------------------------------
-v1 labelled traceroute hop 2 `isp_hop1` because it was hop 2. Kris's hop 2 is
-192.168.1.1 — his DSL router, still in the house — so the headline attribution
-read "ISP" for a segment he owns. That is worse than a missing label: the
+v1 labelled traceroute hop 2 `isp_hop1` because it was hop 2. On a double-NAT
+house, hop 2 is a private address — the DSL router, still in the house — so the
+headline attribution read "ISP" for a segment the operator owns. That is worse
+than a missing label: the
 measurement was right and the story was wrong.
 
 A private address can NEVER be an ISP rung. RFC1918 (10/8, 172.16/12,
@@ -261,7 +262,7 @@ def build_ladder(
     # depth 2/3 — the path onward from the gateway.
     #
     # NOT automatically "the ISP" — each hop is classified on its own address.
-    # Kris's hop 2 is 192.168.1.1, his DSL box: a home_router, not a last mile.
+    # Behind a second router, hop 2 is the DSL box: a home_router, not a last mile.
     hops, trace_err = traceroute_hops(target=trace_target)
     if trace_err:
         # Traceroute told us nothing, so it cannot be evidence that a rung is

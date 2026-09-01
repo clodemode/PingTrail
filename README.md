@@ -147,3 +147,8 @@ clone runs with no setup at all.
 | [CLAUDE.md](CLAUDE.md) | Project overview, harness membership, data model, critical rules |
 | [AGENTS.md](AGENTS.md) | Agent quick-start: constraints, conventions, verification |
 | `LORE/` | Specs and todos, YAML-canonical (app_scope `ping_trail`) |
+
+## License
+
+[MIT](LICENSE). ECharts is vendored under the Apache License 2.0 — see
+[`app/assets/js/echarts.LICENSE.txt`](app/assets/js/echarts.LICENSE.txt).

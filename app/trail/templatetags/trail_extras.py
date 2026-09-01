@@ -8,7 +8,7 @@ register = template.Library()
 
 @register.filter
 def kind_in_house(kind):
-    """True when this rung is Kris's own equipment, on his side of the demarc."""
+    """True when this rung is the operator's own equipment, their side of the demarc."""
     return is_in_house(kind)
 
 

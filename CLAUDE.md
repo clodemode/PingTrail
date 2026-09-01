@@ -70,7 +70,7 @@ The control GET is itself the heartbeat, deliberately: a paused prober ingests n
 
 ### 4. A private address is NEVER an ISP hop.
 
-`10/8`, `172.16/12`, `192.168/16`, and `100.64/10` (CGNAT) are decided by **address space, not traceroute position**. The v1 defect was exactly this: 192.168.1.1 was labelled `isp_hop1` when it is the DSL router still inside the house — the measurements were right and only the labels lied, which is worse, because the headline read "ISP" for a segment Kris owns.
+`10/8`, `172.16/12`, `192.168/16`, and `100.64/10` (CGNAT) are decided by **address space, not traceroute position**. The v1 defect was exactly this: 192.168.1.1 was labelled `isp_hop1` when it is the DSL router still inside the house — the measurements were right and only the labels lied, which is worse, because the headline read "ISP" for a segment the operator owns.
 
 `RungKind.HOME_ROUTER` exists so a second router inside the house is named honestly. `isp_hop` is reserved for the first **public** address. Discovery classifies via `ipaddress.ip_address(...).is_private`; the operator can correct `kind`/`label` inline, and `kind_pinned` / `label_pinned` make the correction survive the next `discover_trail`.
 

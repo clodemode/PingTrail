@@ -1,8 +1,9 @@
 """Re-label the ladder now that address space, not hop position, decides a kind.
 
-Kris's 192.168.1.1 was labelled `isp_hop1` / "last mile / ISP backhaul". It is
-his DSL router, still in the house. The measurements were right; only the nouns
-lied — which is worse, because the headline read "ISP" for a segment he owns.
+A private address such as 192.168.1.1 was labelled `isp_hop1` / "last mile / ISP
+backhaul". It is a DSL router, still in the house. The measurements were right;
+only the nouns lied — which is worse, because the headline read "ISP" for a
+segment the operator owns.
 
 WHAT THIS DELIBERATELY DOES NOT DO
 ----------------------------------
@@ -25,7 +26,7 @@ CGNAT = ipaddress.ip_network("100.64.0.0/10")
 # Enabling sweeping is normally an explicit operator act
 # (leaning-beat-schedule-must-ship-disabled), and the model default is False.
 # But a prober is demonstrably sweeping right now, and a migration that silently
-# switched Kris's live collection off would be a regression dressed as a default.
+# switched a live collection off would be a regression dressed as a default.
 # So: adopt the observed state, narrowly — a vantage whose trail took a tick
 # within this window is already being swept, and stays swept.
 RECENTLY_SWEPT_SECONDS = 300
@@ -59,7 +60,7 @@ def reclassify(apps, schema_editor):
             rung.save(update_fields=["kind", "label"])
 
         # 2. Re-number the labels that numbering now misdescribes. After the
-        #    reclassification Kris has exactly ONE true ISP hop, so calling it
+        #    reclassification a ladder may have exactly ONE true ISP hop, so calling it
         #    `isp_hop2` implies a sibling that does not exist.
         for kind in ("home_router", "isp_hop"):
             group = [r for r in Rung.objects.filter(trail=trail, kind=kind).order_by("depth", "host")]
