@@ -53,19 +53,19 @@ entries:
 
       DONT bring in a second component framework — Bootstrap 5.3 + HTMX + ECharts, matching the fleet.
     do_this: |-
-      Django TARGET_APP `ping_trail`, container `about-ping-trail-1` on :8030, SQLite at /data/db.sqlite3 — scaffold mirrors `mango/` (the newest TARGET_APP): app/config + app/<appname>, Dockerfile, docker-compose.yml `include:`d by ABOUT/docker-compose.yml, /healthz, KEY_PREFIX, gunicorn --reload dev CMD.
+      Django TARGET_APP `ping_trail`, container `about-ping-trail-1` on :8030, SQLite at /data/db.sqlite3 — scaffold mirrors the newest TARGET_APP in the fleet: app/config + app/<appname>, Dockerfile, docker-compose.yml `include:`d by ABOUT/docker-compose.yml, /healthz, KEY_PREFIX, gunicorn --reload dev CMD.
 
       MODELS: Vantage (where a prober runs) - Trail (named ladder, belongs to a Vantage) - Rung (ordered target: depth, kind in loopback/gateway/isp_hop/isp_dns/public_dns/anchor, host, label, discovered_at) - Sample (one tick: trail, fired_at, unique per trail+fired_at) - Probe (one rung's result in one sample: rtt_ms nullable, sent, received, loss_pct, ttl, error). Probe.rtt_ms NULL means timeout, distinct from 0.
 
       COMMANDS: `discover_trail` (read default gateway, traceroute to 1.1.1.1, parse resolv.conf, auto-build the ladder — idempotent, re-runnable when the ISP path changes); `ping_sweep --loop --interval 30` (host-side prober: parallel fire, POST to ingest); `trail_report` (CLI attribution table, the deterministic verifier).
 
-      SURFACE: single dense canvas per spec-bloodride-ui-density-and-context — persistent header, trail selector with live counts, ECharts stacked bar (category x-axis), loss overlay, inversion markers, and an inline-expandable per-tick raw-RTT table (HTMX, no modals per spec-no-modals-htmx-inline-expansion). Stacked-bar labels must follow `echarts-stacked-label-total` — pre-compute bucket totals; p.value gives one segment only.
+      SURFACE: single dense canvas per the platform's UI density-and-context spec — persistent header, trail selector with live counts, ECharts stacked bar (category x-axis), loss overlay, inversion markers, and an inline-expandable per-tick raw-RTT table (HTMX, no modals per spec-no-modals-htmx-inline-expansion). Stacked-bar labels must follow `echarts-stacked-label-total` — pre-compute bucket totals; p.value gives one segment only.
 
       VERIFY deterministically before browser: seed a fixture trail with a known injected delay at a known rung, run trail_report, assert the attribution names that rung.
     do_also: |-
       REGISTRATION (DONE 2026-08-02): `ping_trail` is now a registered AppScope member (INTENT/models/fools.py, migration 0064_alter_foolslore_app_scope), an `include:` + `/app/fleet/ping_trail` mount in ABOUT/docker-compose.yml, a clone line in CLODE/CLAUDE.md's self-boot list, and its own sibling repo. This spec is re-homed to app_scope='ping_trail' with its YAML at ping_trail/LORE/clogger/. NOTE the repo is `clodemode/ping-trail` with a HYPHEN (GitHub normalized the underscore) while the local DIRECTORY stays `ping_trail` — see todo-ping-trail-repo-remote-and-clone-line-use-stale-underscore-name. Still outstanding: no KRISPY_KRATES krate/spring, and no dedicated MCP toolbox (no `ping_trail_manage` tool) — use `docker exec about-ping-trail-1 python manage.py <cmd>`.
 
-      PORT 8030 chosen as next free in the fleet ladder (formicary :8010, mango :8020). Verified free against every compose in the workspace on 2026-08-01.
+      PORT 8030 chosen as the next free rung in the fleet's port ladder. Verified free against every compose in the workspace on 2026-08-01.
 
       ICMP PRIVILEGE: unprivileged ICMP datagram sockets (SOCK_DGRAM/IPPROTO_ICMP) work on macOS without root and are strongly preferred over raw sockets or shelling to /sbin/ping. Falling back to parsing `ping` stdout is acceptable only if the datagram socket path fails, and the fallback must still fire all rungs in parallel.
 

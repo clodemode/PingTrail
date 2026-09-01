@@ -45,4 +45,4 @@ entries:
 
     Already-collected history (trail 1 `home`, 30+ ticks as of 2026-08-01) must remain queryable and correctly rendered after the reclassification — verify by running trail_report over the oldest ticks after migrating.
 
-    Note for interpretation once relabelled: on the v1 sample window the in-house segments were clean (home_router +3.9ms mean) while the first ISP hop carried +711ms — but `gateway` showed +93.6ms mean, which is the Mac-to-inner-router link and is a SEPARATE in-house problem (likely WiFi contention) worth surfacing distinctly from the ISP finding.
+    Note for interpretation once relabelled: on the v1 sample window the in-house segments were clean (home_router +3.9ms mean) while the first ISP hop carried +711ms — but `gateway` showed +93.6ms mean, which is the host-to-inner-router link and is a SEPARATE in-house problem (likely WiFi contention) worth surfacing distinctly from the ISP finding.
