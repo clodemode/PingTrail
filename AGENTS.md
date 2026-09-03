@@ -3,11 +3,11 @@
 >
 > This is a **CLODE platform thread.** Inline work and a bare `Agent(subagent_type=…)` carry **none** of the contract — no LORE guidance, no DOMINO-equipped MCP tools, no HEY_LEAN presence — and are **invisible to sibling threads**, so they collide silently. Do these two **first**:
 >
-> 1. **`codi_orient(session=…, scope=…, klass='beacon'|'orchestrator', cwd=…, branch=…, stale_seconds=900, app_scope='ping_trail', lair=…, tag=…)`**
+> 1. **`agent_start(session=…, scope=…, cwd=…, branch=…, stale_seconds=900, app_scope='ping_trail', lair=…, tag=…)`**
 >    **ONE call** — registers presence on HEY_LEAN, snapshots live siblings, and returns the scoped briefing. Compose **every** briefing dimension you know (AND semantics; a bare `lair=` ranks 20 slots against 800+ rows — composed, against dozens). In this repo that means **`app_scope='ping_trail'`** plus the `lair=` you are working in. Ruled 2026-08-11: precision over capacity, cap stays 20.
 >    Read **all three sections**. A sibling on your surface → freeze a HEY_LEAN baseline before touching it. Each section carries its own `status`: a briefing error does **not** mean the beacon went unwritten.
->    *Fallback, equally contract-satisfying, if `codi_orient` is unavailable or a section errors:* `agent_register(...)` → `agent_active(stale_seconds=900)` → `ido_briefing(app_scope='ping_trail', lair=…)`.
-> 2. **Dispatch the work as a CODI** — not inline, not a bare subagent. Out-of-scope finds → **`lairs_lore_add(lore_type='todo')`**, *never* a `spawn_task`/chip. Every dispatch prompt — and your own thread-end — must carry the completion line: *On completion call ``codi_ledger_record(codi_slug=…, status=…, lore_refs=<every slug you consulted or obeyed, INCLUDING rows seen only as a one-line `dont` in a briefing>)``, or pass `no_lore_consulted=True` if genuinely none.*
+>    *Fallback, equally contract-satisfying, if `agent_start` is unavailable or a section errors:* `agent_register(...)` → `agent_active(stale_seconds=900)` → `ido_briefing(app_scope='ping_trail', lair=…)`.
+> 2. **Dispatch the work as a CODI** — not inline, not a bare subagent. A dispatched CODI opens its own beacon with `agent_codi_start(...)` (RULED 2026-09-03: the band is in the NAME — `agent_start`/`agent_codi_start`, `agent_heartbeat`/`agent_codi_heartbeat`, `agent_stop`/`agent_codi_stop`). Out-of-scope finds → **`lairs_lore_add(lore_type='todo')`**, *never* a `spawn_task`/chip. Every dispatch prompt — and your own thread-end — must carry the completion line: *On completion call ``codi_ledger_record(codi_slug=…, status=…, lore_refs=<every slug you consulted or obeyed, INCLUDING rows seen only as a one-line `dont` in a briefing>)``, or pass `no_lore_consulted=True` if genuinely none.*
 >
 > About to call Edit/Write/Task before doing 1–2? **Stop and orient.**
 <!-- /CLODE-COLD-START-GATE -->
