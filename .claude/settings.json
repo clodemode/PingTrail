@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ -x ../ABOUT/CLODE/scripts/session-start-orient.sh ] && ../ABOUT/CLODE/scripts/session-start-orient.sh || true"
+            "command": "d=\"${CLAUDE_PROJECT_DIR:-.}\"; c=\"$(git -C \"$d\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)\" && d=\"${c%/*}\"; s=\"$d/../ABOUT/CLODE/scripts/session-start-orient.sh\"; [ -x \"$s\" ] && \"$s\" || true"
           }
         ]
       }
