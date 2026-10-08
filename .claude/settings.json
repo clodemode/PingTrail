@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "[ \"${CLAUDE_CODE_REMOTE:-}\" = true ] && exit 0; d=\"${CLAUDE_PROJECT_DIR:-.}\"; c=\"$(git -C \"$d\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)\" && d=\"${c%/*}\"; s=\"$d/../ABOUT/CLODE/scripts/session-start-orient.sh\"; [ -x \"$s\" ] && \"$s\" || true"
+            "command": "[ \"${CLAUDE_CODE_REMOTE:-}\" = true ] && exit 0; d=\"${CLAUDE_PROJECT_DIR:-.}\"; c=\"$(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_COMMON_DIR git -C \"$d\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)\" && d=\"${c%/*}\"; s=\"$d/../ABOUT/CLODE/scripts/session-start-orient.sh\"; [ -x \"$s\" ] && \"$s\" || true"
           }
         ]
       }
