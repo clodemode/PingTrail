@@ -10,6 +10,41 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"${CLAUDE_CODE_REMOTE:-}\" = true ] && exit 0; d=\"${CLAUDE_PROJECT_DIR:-.}\"; c=\"$(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_COMMON_DIR git -C \"$d\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)\" && d=\"${c%/*}\"; s=\"$d/../ABOUT/CLODE/scripts/codi-ledger-agent-hook.sh\"; [ -x \"$s\" ] && \"$s\" pre || true"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__clode__agent_start|mcp__clode__agent_register|mcp__clode__codi_orient",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"${CLAUDE_CODE_REMOTE:-}\" = true ] && exit 0; d=\"${CLAUDE_PROJECT_DIR:-.}\"; c=\"$(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_COMMON_DIR git -C \"$d\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)\" && d=\"${c%/*}\"; s=\"$d/../ABOUT/CLODE/scripts/agent-start-session-guard.sh\"; [ -x \"$s\" ] && \"$s\" || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ \"${CLAUDE_CODE_REMOTE:-}\" = true ] && exit 0; d=\"${CLAUDE_PROJECT_DIR:-.}\"; c=\"$(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_COMMON_DIR git -C \"$d\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)\" && d=\"${c%/*}\"; s=\"$d/../ABOUT/CLODE/scripts/codi-ledger-agent-hook.sh\"; [ -x \"$s\" ] && \"$s\" post || true"
+          },
+          {
+            "type": "command",
+            "command": "[ \"${CLAUDE_CODE_REMOTE:-}\" = true ] && exit 0; d=\"${CLAUDE_PROJECT_DIR:-.}\"; c=\"$(env -u GIT_DIR -u GIT_WORK_TREE -u GIT_COMMON_DIR git -C \"$d\" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)\" && d=\"${c%/*}\"; s=\"$d/../ABOUT/CLODE/scripts/agent-stop-hook.sh\"; [ -x \"$s\" ] && \"$s\" task || true"
+          }
+        ]
+      }
     ]
   }
 }
