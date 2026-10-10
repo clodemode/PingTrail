@@ -1,0 +1,28 @@
+entries:
+- slug: todo-ping-trail-add-app-profile-yaml-at-the-repo-root-so-about-reads-its-venue-paths-instead-of-hardcoding-them
+  title: 'PingTrail: add APP_PROFILE.yaml at the repo root so ABOUT reads its venue paths (Fly app, code/data
+    dirs, container, test mounts) instead of hardcoding them'
+  domain: lore
+  lore_type: todo
+  app_scope: ping_trail
+  lair: packaging
+  character_slug: krispy
+  tags:
+  - app-profile
+  - platform
+  - paths
+  - fly
+  - packaging
+  status: design
+  description: Filed 2026-10-09 by codi-ab-app-profile-v1-2026-10-09 when ABOUT gained the APP_PROFILE
+    loader (INTENT/TOOLS/_app_profile.py, MCP app_profile; clodemode/formicary APP_PROFILE.yaml is the
+    worked example). PingTrail (checkout dir ping_trail, app_scope ping_trail) is on ABOUT's MISSING_PROFILES
+    ratchet. No PingTrail-specific venue literal found in ABOUT/INTENT at filing beyond fleet_apps.CODE_SUBDIRS
+    ('app').
+  dont: DONT put a secret, token or user data in the profile (the schema is closed). DONT name the app
+    anything but ping_trail in the profile's app field - it must match the checkout directory.
+  do_this: 'DO add ping_trail/APP_PROFILE.yaml (app: ping_trail) with its real values, point its AGENTS.md/CLAUDE.md
+    at it, verify with app_profile(app=''ping_trail''), then in an ABOUT change delete ''ping_trail''
+    from MISSING_PROFILES.'
+  depends_on:
+  - spec-clode-every-target-app-declares-its-own-venue-paths-in-an-app-profile-at-its-repo-root-and-about-reads-them-never-hardcodes-them
