@@ -1,0 +1,31 @@
+entries:
+- slug: todo-ping-trail-has-no-lore-citation-baseline-and-the-about-r16-extractor-widening-surfaced-its-first-dangling-code-citation-wire-the-floor-or-fix-the-one
+  title: 'ping_trail carries no lore_citation_baseline.json, and the ABOUT R16 extractor widening (a slug
+    cited right after [ or ( now reads) surfaced its first dangling code citation: fix that one citation,
+    then decide whether ping_trail''s push gate runs the citation floor at all'
+  domain: lore
+  lore_type: todo
+  app_scope: ping_trail
+  lair: tools
+  character_slug: krispy
+  tags:
+  - citation-floor
+  - lore-citation-audit
+  - baseline
+  - r16
+  - '2026-10-26'
+  status: design
+  description: 'Filed 2026-10-26 by AB:LORE tooling (f166dc33) under Kris''s R16 ruling (CLEANUP set about-todo-burn-down-rulings-2026-10-23,
+    card r16-reverse-refs-citation-floor-blast): each consumer handles its own floor from a todo its repo
+    owns. The fix: ABOUT''s _lore_refs.py RE_BARE admits [ and ( before a bare slug (todo-about-lore-reverse-refs-misses-a-slug-cited-bare-inside-a-bracketed-comma-list-so-close-out-ceremony-lists-are-invisible-and-the-census-evidence-score-under-counts).
+    Measured by codi-ab-lore-tooling-rubric-refs-2026-10-26: ping_trail unresolved 0 -> 1. git ls-files
+    in ping_trail finds no lore_citation_baseline.json, so either its gate does not run the floor (and
+    nothing reddens) or it runs with an empty baseline (and this one key reddens it).'
+  dont: DONT bake a one-key baseline just to silence it if the citation can simply be fixed.
+  do_this: Run lore_citation_audit --roots /app/fleet/ping_trail --check to name the one key; repoint
+    or reword that comment; then check whether ping_trail's pre-push wires the citation floor and say
+    so on this row before closing it.
+  effort: S
+  impact: low
+  triaged_at: '2026-10-26T20:34:05.564745+00:00'
+  triaged_by: krispy
