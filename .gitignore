@@ -8,3 +8,10 @@ __pycache__/
 .env
 staticfiles/
 app/static/
+
+# Claude Code settings stay out of git. The cold-start hooks are baked per
+# machine into the untracked .claude/settings.local.json by
+# ABOUT/CLODE/GATE/cold_start_gate.py (ruled 2026-10-31: a tracked
+# settings.json is executable config a commit can change).
+.claude/settings.json
+.claude/settings.local.json
